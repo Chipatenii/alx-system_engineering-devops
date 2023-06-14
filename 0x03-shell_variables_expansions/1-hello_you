@@ -1,0 +1,3 @@
+#!/bin/bash
+user="$USER"
+echo hello $user
