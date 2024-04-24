@@ -2,5 +2,5 @@
 
 # Use exec resource to execute the pkill command
 exec { 'kill_killmenow_process':
-  command => 'pkill killmenow',
+  command => '/usr/bin/pkill killmenow',
 }
