@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# This script creates an RSA key pair with specified parameters
+
+openssl genrsa -aes256 -passout pass:betty -out ~/.ssh/school.pem 4096
+openssl rsa -passin pass:betty -pubout -in ~/.ssh/school.pem -out ~/.ssh/school.pub
