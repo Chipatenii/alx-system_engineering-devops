@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 # This script creates an RSA key pair with specified parameters
 
-openssl genrsa -aes256 -passout pass:betty -out ~/.ssh/school.pem 4096
-openssl rsa -passin pass:betty -pubout -in ~/.ssh/school.pem -out ~/.ssh/school.pub
+# Create the .ssh directory if it doesn't exist
+mkdir -p ~/.ssh/
+
+# Generate the RSA private key with passphrase
+openssl genrsa -aes256 -passout pass:betty -out ~/.ssh/school 4096
+
+# Generate the corresponding public key
+openssl rsa -passin pass:betty -pubout -in ~/.ssh/school -out ~/.ssh/school.pub
+
