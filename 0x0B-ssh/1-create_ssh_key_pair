@@ -1,3 +1,14 @@
 #!/usr/bin/env bash
 # This script creates an RSA key pair with specified parameters
-openssl genrsa -aes256 -out school.pem -passout pass:betty 4096
+
+# Set the desired key file name
+key_name="school"
+
+# Set the desired number of bits for the key
+bits=4096
+
+# Set the passphrase
+passphrase="betty"
+
+# Generate the RSA key pair
+ssh-keygen -t rsa -b $bits -f "$key_name" -N "$passphrase"
