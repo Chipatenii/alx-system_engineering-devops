@@ -25,7 +25,7 @@ service nginx restart
 echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=http://example.com/new_page\"></head><body></body></html>" > /var/www/html/redirect_me.html
 
 # Configure Nginx to redirect /redirect_me with a 301 Moved Permanently status code
-sed -i '/location \/ {/a \\tlocation \/redirect_me {\\n\t\treturn 301 http:\/\/\$host\/new_page;\\n\t}' /etc/nginx/sites-available/default
+sed -i "/location \/ {/a \\tlocation \/redirect_me {\\n\t\treturn 301 http:\/\/\$host\/new_page;\\n\t}" /etc/nginx/sites-available/default
 
 # Restart Nginx to apply changes
 service nginx restart
