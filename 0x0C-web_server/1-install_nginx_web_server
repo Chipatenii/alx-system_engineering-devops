@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# This script installs and configures Nginx on an Ubuntu machine
+# to listen on port 80 and return "Hello World!" at its root (/) endpoint.
+
+set -euo pipefail
+
+# Update package index
+apt update
+
+# Install Nginx
+apt install -y nginx
+
+# Start Nginx (if not already started)
+service nginx start
+
+# Ensure Nginx is listening on port 80
+if ! grep -q "listen 80;" /etc/nginx/sites-available/default; then
+    sed -i 's/listen 80;/listen 80;/' /etc/nginx/sites-available/default
+fi
+
+# Restart Nginx to apply changes
+service nginx restart
+
+# Create a temporary HTML file with "Hello World!" content
+echo "<html><body><h1>Hello World!</h1></body></html>" > /var/www/html/index.html
