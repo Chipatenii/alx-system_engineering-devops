@@ -15,38 +15,17 @@ service nginx start
 
 # Ensure Nginx is listening on port 80
 if ! grep -q "listen 80;" /etc/nginx/sites-available/default; then
-    sed -i 's/listen 80;/listen 80;/' /etc/nginx/sites-available/default
+    sed -i '/listen 80;/c\        listen 80;' /etc/nginx/sites-available/default
 fi
+
+# Restart Nginx to apply changes
+service nginx restart
 
 # Create a temporary HTML file with the redirection content
 echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=http://example.com/new_page\"></head><body></body></html>" > /var/www/html/redirect_me.html
 
 # Configure Nginx to redirect /redirect_me with a 301 Moved Permanently status code
-cat > /etc/nginx/sites-available/redirect_me <<EOF
-server {
-    listen 80;
-    server_name _;
-
-    location /redirect_me {
-        return 301 http://\$host/new_page;
-    }
-
-    error_page 404 /404.html;
-    location = /404.html {
-        root /usr/share/nginx/html;
-        internal;
-    }
-
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {
-        root /usr/share/nginx/html;
-        internal;
-    }
-}
-EOF
-
-# Enable the redirect_me site configuration
-ln -s /etc/nginx/sites-available/redirect_me /etc/nginx/sites-enabled/
+sed -i '/location \/ {/a \\tlocation \/redirect_me {\\n\t\treturn 301 http:\/\/\$host\/new_page;\\n\t}' /etc/nginx/sites-available/default
 
 # Restart Nginx to apply changes
 service nginx restart
