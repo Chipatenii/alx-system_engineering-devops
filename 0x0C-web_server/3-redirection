@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# This script configures Nginx on an Ubuntu machine
+# to redirect /redirect_me to another page with a "301 Moved Permanently" status code.
+
+set -euo pipefail
+
+# Update package index
+apt update
+
+# Install Nginx
+apt install -y nginx
+
+# Start Nginx (if not already started)
+service nginx start
+
+# Ensure Nginx is listening on port 80
+if ! grep -q "listen 80;" /etc/nginx/sites-available/default; then
+    sed -i 's/listen 80;/listen 80;/' /etc/nginx/sites-available/default
+fi
+
+# Create a temporary HTML file with the redirection content
+echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=http://example.com/new_page\"></head><body></body></html>" > /var/www/html/redirect_me.html
+
+# Configure Nginx to redirect /redirect_me with a 301 Moved Permanently status code
+cat > /etc/nginx/sites-available/redirect_me <<EOF
+server {
+    listen 80;
+    server_name _;
+
+    location /redirect_me {
+        return 301 http://\$host/new_page;
+    }
+
+    error_page 404 /404.html;
+    location = /404.html {
+        root /usr/share/nginx/html;
+        internal;
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+        internal;
+    }
+}
+EOF
+
+# Enable the redirect_me site configuration
+ln -s /etc/nginx/sites-available/redirect_me /etc/nginx/sites-enabled/
+
+# Restart Nginx to apply changes
+service nginx restart
+
+# Display message indicating successful configuration
+echo "Nginx has been configured to redirect /redirect_me to another page with a 301 Moved Permanently status code."
