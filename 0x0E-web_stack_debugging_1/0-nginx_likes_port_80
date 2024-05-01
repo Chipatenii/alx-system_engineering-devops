@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# This script checks if Nginx is installed and running, configures it to listen on port 80,
+# and checks Nginx error logs for any issues.
+
+# Check if script is executed as root
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run this script with sudo."
+    exit 1
+fi
+
+# Check if Nginx is installed
+if ! command -v nginx &> /dev/null; then
+    echo "Nginx is not installed. Installing..."
+    sudo apt update
+    sudo apt install nginx -y
+fi
+
+# Check if Nginx is running
+if ! systemctl is-active --quiet nginx; then
+    echo "Nginx is not running. Starting..."
+    sudo systemctl start nginx
+fi
+
+# Verify Nginx configuration
+nginx_config="/etc/nginx/sites-available/default"
+
+if ! grep -q "listen 80;" "$nginx_config"; then
+    echo "Updating Nginx configuration to listen on port 80..."
+    sudo sed -i 's/listen 80;/listen 80 default_server;/g' "$nginx_config"
+    sudo systemctl restart nginx
+fi
+
+# Check Nginx error logs for any issues
+nginx_error_log="/var/log/nginx/error.log"
+if [ -f "$nginx_error_log" ]; then
+    error_count=$(sudo grep -c "error" "$nginx_error_log")
+    if [ "$error_count" -gt 0 ]; then
+        echo "There are errors in Nginx error logs. Please check: $nginx_error_log"
+    fi
+fi
+
+echo "Nginx is now configured to listen on port 80."
