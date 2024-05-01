@@ -1,50 +1,32 @@
 #!/usr/bin/env bash
-# This script installs and configures HAproxy on an Ubuntu machine to meet the specified requirements.
+# Create a script to install and configure HAProxy on lb-01 server
+# Configure HAProxy to send traffic to web-01 and web-02 servers
+# Distribute requests using a roundrobin algorithm
+# Make sure that HAProxy can be managed via an init script
 
-# Update package repositories
-sudo apt-get update
+# Install and configure HAproxy on my lb-01 server.
+sudo apt-get -y update
+apt-get -y install haproxy
 
-# Install HAproxy
-sudo apt-get install -y haproxy
+# edit config file
+server_config=\
+"
+frontend  manda_frontend
+        bind *:80
+        mode http
+        default_backend besthor_backend
+backend besthor_backend
+        balance roundrobin
+        server 68096-web-01 100.25.133.89:80 check
+        server 68096-web-02 3.84.255.110:80 check
+"
+echo "$server_config" | sudo tee -a /etc/haproxy/haproxy.cfg
 
-# Configure HAproxy
-sudo bash -c 'cat <<EOF > /etc/haproxy/haproxy.cfg
-global
-    log /dev/log    local0
-    log /dev/log    local1 notice
-    chroot /var/lib/haproxy
-    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
-    stats timeout 30s
-    user haproxy
-    group haproxy
-    daemon
+# enable haproxy to be started by init script
+echo "ENABLED=1" | sudo tee -a /etc/default/haproxy
 
-defaults
-    log     global
-    mode    http
-    option  httplog
-    option  dontlognull
-    timeout connect 5000
-    timeout client  50000
-    timeout server  50000
-    errorfile 400 /etc/haproxy/errors/400.http
-    errorfile 403 /etc/haproxy/errors/403.http
-    errorfile 408 /etc/haproxy/errors/408.http
-    errorfile 500 /etc/haproxy/errors/500.http
-    errorfile 502 /etc/haproxy/errors/502.http
-    errorfile 503 /etc/haproxy/errors/503.http
-    errorfile 504 /etc/haproxy/errors/504.http
+# Testing the HAproxy configuration file
+sudo haproxy -c -f /etc/haproxy/haproxy.cfg
 
-frontend http_front
-    bind *:80
-    stats uri /haproxy?stats
-    default_backend http_back
-
-backend http_back
-    balance roundrobin
-    server server1 100.25.133.89:80 check
-    server server2 3.84.255.110:80 check
-EOF'
-
-# Restart HAproxy service
-sudo systemctl restart haproxy
+# Restart the Nginx service
+sudo service haproxy restart
