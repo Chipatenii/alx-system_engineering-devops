@@ -17,8 +17,8 @@ frontend  manda_frontend
         default_backend besthor_backend
 backend besthor_backend
         balance roundrobin
-        server 68096-web-01 100.25.133.89:80 check
-        server 68096-web-02 3.84.255.110:80 check
+        server 68096-web-01 100.24.74.236:80 check
+        server 68096-web-02 52.3.241.18:80 check
 "
 echo "$server_config" | sudo tee -a /etc/haproxy/haproxy.cfg
 
